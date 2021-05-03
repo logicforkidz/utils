@@ -176,10 +176,11 @@ if args.command == 'upload':
         print_trace ('client connected\n')
         scp = SCPClient(client.get_transport())
         print_trace ('scpclient created\n')
-        target_file  = project_dir + '/' + name + '.' + file)
+        target_file  = project_dir + '/' + name + '.' + f
         print_trace (f'trying to upload {f} to {target_file}\n')
         scp.put (f, target_file)
         print_trace ('scp done\n')
+        print (f'The contents of the {remote}:{project_dir} are:\n')
         i, o, err = client.exec_command('ls -al ' + project_dir)
         for line in o:
             print (line)
