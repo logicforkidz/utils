@@ -127,11 +127,11 @@ if args.command == 'list':
     classname = get_classname(args)
     remote = get_remote(args)
     pem = get_id(args)
-    file = get_file(args)
-    if not file: file = ''
+    f = get_file(args)
+    if not f: f = ''
     if not name or not remote or not pem or not classname:
         print ("\nRequired arguments not provided. Run \"python", sys.argv[0], "configure first !\"\n")
-        print_trace(f'{name} {remote} {pem} {classname} {file}')
+        print_trace(f'{name} {remote} {pem} {classname} {f}')
         sys.exit(0)
 
     # execute command
@@ -139,9 +139,9 @@ if args.command == 'list':
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        print_trace (f'Connecting to {remote} as {classname} id={pem} command=ls -a {file}')
+        print_trace (f'Connecting to {remote} as {classname} id={pem} command=ls -a {f}')
         client.connect(remote, username=classname, key_filename=pem)
-        i, o, err = client.exec_command('ls -a ' + file)
+        i, o, err = client.exec_command('ls -a ' + f)
         for line in o:
             print (line)
         client.close()
@@ -159,10 +159,10 @@ if args.command == 'upload':
     classname = get_classname(args)
     remote = get_remote(args)
     pem = get_id(args)
-    file = get_file(args)
-    if not name or not remote or not pem or not classname or not file:
+    f = get_file(args)
+    if not name or not remote or not pem or not classname or not f:
         print ("\nRequired arguments not provided. Run \"python", sys.argv[0], "configure first !\"\n")
-        print_trace(f'{name} {remote} {pem} {classname} {file}')
+        print_trace(f'{name} {remote} {pem} {classname} {f}')
         sys.exit(0)
 
     project_dir = remote.split('.')[0] + '/src'
@@ -171,12 +171,14 @@ if args.command == 'upload':
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        print_trace (f'Connecting to {remote} as {classname} id={pem} uploading={name}.{file}')
+        print_trace (f'Connecting to {remote} as {classname} id={pem} uploading={name}.{f}')
         client.connect(remote, username=classname, key_filename=pem)
         print_trace ('client connected\n')
         scp = SCPClient(client.get_transport())
         print_trace ('scpclient created\n')
-        scp.put (file, project_dir + '/' + name + '.' + file)
+        target_file  = project_dir + '/' + name + '.' + file)
+        print_trace (f'trying to upload {f} to {target_file}\n')
+        scp.put (f, target_file)
         print_trace ('scp done\n')
         i, o, err = client.exec_command('ls -al ' + project_dir)
         for line in o:
