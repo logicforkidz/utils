@@ -191,5 +191,47 @@ if args.command == 'upload':
         sys.exit(1)
 
 
+#implement download command
+if args.command == 'download':
+    #read from default config if it exists
+    read_from_default_config()
+
+    # get the params
+    name = get_name(args)
+    classname = get_classname(args)
+    remote = get_remote(args)
+    pem = get_id(args)
+    f = get_file(args)
+    if not name or not remote or not pem or not classname or not f:
+        print ("\nRequired arguments not provided. Run \"python", sys.argv[0], "configure first !\"\n")
+        print_trace(f'{name} {remote} {pem} {classname} {f}')
+        sys.exit(0)
+
+    # we expect that on the remote the project directory is same as subdomain
+    # and that all source files are stored in its src subdirectory.
+    project_dir = remote.split('.')[0] + '/src'
+
+    try:
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        print_trace (f'Connecting to {remote} as {classname} id={pem} uploading={name}.{f}')
+        client.connect(remote, username=classname, key_filename=pem)
+        print_trace ('client connected\n')
+        scp = SCPClient(client.get_transport())
+        print_trace ('scpclient created\n')
+        source_file = project_dir + '/' + name + '.' + f
+        from os import getcwd
+        cwd = getcwd()
+        print_trace (f'trying to download {source_file} to {cwd}\n')
+        scp.get (source_file, cwd)
+        print_trace ('scp done\n')
+        scp.close()
+        client.close()
+    except Exception as e:
+        print (f"Got exception {e}")
+        sys.exit(1)
+
+
 print_trace(args)
 
