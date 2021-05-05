@@ -127,12 +127,13 @@ if args.command == 'list':
     classname = get_classname(args)
     remote = get_remote(args)
     pem = get_id(args)
-    f = get_file(args)
-    if not f: f = ''
     if not name or not remote or not pem or not classname:
         print ("\nRequired arguments not provided. Run \"python", sys.argv[0], "configure first !\"\n")
         print_trace(f'{name} {remote} {pem} {classname} {f}')
         sys.exit(0)
+
+    f = get_file(args)
+    if not f: f = remote.split('.')[0] + '/src'
 
     # execute command
     try:
